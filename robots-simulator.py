@@ -22,7 +22,7 @@ def generate_robot_data(robot_id):
     return {
         "state": random.choice(["idle", "active", "charging", "dead"]),
         "battery": random.uniform(30, 100),
-        "battery_temp": random.uniform(20, 80),
+        "battery_health": random.uniform(20, 80),
     }
 
 # sends robots telemetry to db
@@ -38,7 +38,7 @@ def send_data():
                     .tag("robot_id", robot_id)
                     .tag("state", telemetry["state"])
                     .field("battery", telemetry["battery"])
-                    .field("battery_temp", telemetry["battery_temp"])
+                    .field("battery_health", telemetry["battery_health"])
                     .time(time.time_ns(), WritePrecision.NS)
                 )
                 write_api.write(bucket=BUCKET, org=ORG, record=point)

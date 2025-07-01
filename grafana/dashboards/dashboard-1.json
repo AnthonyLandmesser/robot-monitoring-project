@@ -162,7 +162,7 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
+        "h": 5,
         "w": 12,
         "x": 12,
         "y": 0
@@ -209,6 +209,8 @@
             "axisColorMode": "text",
             "axisLabel": "",
             "axisPlacement": "auto",
+            "axisSoftMax": 100,
+            "axisSoftMin": 20,
             "barAlignment": 0,
             "barWidthFactor": 0.6,
             "drawStyle": "line",
@@ -279,11 +281,106 @@
             "type": "influxdb",
             "uid": "beqhlshisrw8wa"
           },
-          "query": "from(bucket: \"telemetry\")\r\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\r\n  |> filter(fn: (r) => r[\"_measurement\"] == \"robot_metrics\")\r\n  |> filter(fn: (r) => r[\"_field\"] == \"battery\")\r\n  |> filter(fn: (r) => r[\"robot_id\"] == \"robot_1\")",
+          "query": "from(bucket: \"telemetry\")\r\n  |> range(start: -5m)\r\n  |> filter(fn: (r) => r._measurement == \"robot_metrics\")\r\n  |> filter(fn: (r) => r._field == \"battery\")\r\n  |> drop(columns: [\"state\"])\r\n  |> aggregateWindow(every: 5s, fn: mean, createEmpty: false)\r\n  |> group(columns: [\"robot_id\"])\r\n  |> rename(columns: {_value: \"Battery %\"})\r\n  |> yield(name: \"battery\")\r\n",
           "refId": "A"
         }
       ],
       "title": "Battery State of Charge",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P16091175048AC601"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "axisSoftMax": 100,
+            "axisSoftMin": 20,
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "influxdb",
+            "uid": "beqhlshisrw8wa"
+          },
+          "query": "from(bucket: \"telemetry\")\r\n  |> range(start: -5m)\r\n  |> filter(fn: (r) => r._measurement == \"robot_metrics\")\r\n  |> filter(fn: (r) => r._field == \"battery_health\")\r\n  |> drop(columns: [\"state\"])\r\n  |> aggregateWindow(every: 5s, fn: mean, createEmpty: false)\r\n  |> group(columns: [\"robot_id\"])\r\n  |> rename(columns: {_value: \"Battery capacity %\"})\r\n  |> yield(name: \"battery\")\r\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Battery Health",
       "type": "timeseries"
     }
   ],
