@@ -29,6 +29,103 @@
       "fieldConfig": {
         "defaults": {
           "color": {
+            "mode": "fixed"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "color-background"
+            },
+            "inspect": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "active": {
+                  "color": "green",
+                  "index": 1
+                },
+                "charging": {
+                  "color": "yellow",
+                  "index": 2
+                },
+                "dead": {
+                  "color": "red",
+                  "index": 3
+                },
+                "idle": {
+                  "color": "blue",
+                  "index": 0
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byType",
+              "options": "string"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 3,
+      "options": {
+        "cellHeight": "sm",
+        "footer": {
+          "countRows": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "frameIndex": 0,
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "12.0.2",
+      "targets": [
+        {
+          "query": "import \"date\"\r\nfrom(bucket: \"telemetry\")\r\n  |> range(start: -5m)\r\n  |> filter(fn: (r) => r._measurement == \"robot_metrics\")\r\n  |> group(columns: [\"robot_id\"])\r\n  |> last()\r\n  |> keep(columns: [\"_time\", \"robot_id\", \"state\"])\r\n  |> map(fn: (r) => ({ r with _time: date.truncate(t: r._time, unit: 1s) }))\r\n  |> pivot(\r\n    rowKey: [\"_time\"],\r\n    columnKey: [\"robot_id\"],\r\n    valueColumn: \"state\"\r\n  )\r\n  |> rename(columns: {_time: \"time\"})\r\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Robot States",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "P16091175048AC601"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
             "mode": "thresholds"
           },
           "mappings": [
@@ -67,7 +164,7 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
+        "x": 12,
         "y": 0
       },
       "id": 2,
@@ -159,7 +256,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 0
+        "y": 5
       },
       "id": 1,
       "options": {
@@ -186,7 +283,7 @@
           "refId": "A"
         }
       ],
-      "title": "New panel",
+      "title": "Battery State of Charge",
       "type": "timeseries"
     }
   ],
