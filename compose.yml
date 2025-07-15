@@ -32,14 +32,15 @@ services:
   flask:
     build: ./flask
     container_name: flask
-    #restart: unless-stopped
+    restart: unless-stopped
     ports:
       - "5000:5000"
     depends_on:
       - influxdb
     environment:
-      - PORT=5000
       - INFLUXDB_URL=http://influxdb:8086
       - INFLUXDB_TOKEN=secret-token
       - INFLUXDB_ORG=robotics
       - INFLUXDB_BUCKET=telemetry
+    volumes:
+      - ./flask:/usr/src/app

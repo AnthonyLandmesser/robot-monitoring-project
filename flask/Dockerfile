@@ -1,10 +1,8 @@
-FROM python:3.13-slim
+FROM python:3.10
 
 WORKDIR /usr/src/app
 
-COPY requirements.txt .
+COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY rest-api.py .
-
-CMD [ "python", "rest-api.py" ]
+CMD [ "gunicorn", "--bind", "0.0.0.0:5000", "rest-api:app" ]

@@ -10,7 +10,6 @@ URL = environ["INFLUXDB_URL"]
 TOKEN = environ["INFLUXDB_TOKEN"]
 ORG = environ["INFLUXDB_ORG"]
 BUCKET = environ["INFLUXDB_BUCKET"]
-#PORT = environ["PORT"]
 
 client = InfluxDBClient(url=URL, token=TOKEN, org=ORG)
 write_api = client.write_api(write_options=SYNCHRONOUS)
@@ -33,9 +32,6 @@ def robot_metrics():
         return jsonify({"error": str(e)}), 400
 
 @app.teardown_appcontext
-def close_influx_client(exception):
+def close_influx_client(exception=None):
     write_api.close()
     client.close()
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
