@@ -7,4 +7,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY rest-api.py .
 
-CMD [ "python", ".rest-api.py" ]
+CMD [ "python", "rest-api.py" ]
