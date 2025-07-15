@@ -28,3 +28,17 @@ services:
       - GF_AUTH_DISABLE_LOGIN_FORM=true
     volumes:
       - ./grafana:/etc/grafana/provisioning
+
+  flask:
+    build: ./flask
+    container_name: flask
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    depends_on:
+      - influxdb
+    environment:
+      - INFLUXDB_URL=http://influxdb:8086
+      - INFLUXDB_TOKEN=secret-token
+      - INFLUXDB_ORG=robotics
+      - INFLUXDB_BUCKET=telemetry
