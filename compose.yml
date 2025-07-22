@@ -38,6 +38,7 @@ services:
     depends_on:
       - influxdb
     environment:
+      - PYTHONDONTWRITEBYTECODE=1
       - INFLUXDB_URL=http://influxdb:8086
       - INFLUXDB_TOKEN=secret-token
       - INFLUXDB_ORG=robotics

@@ -1,54 +1,49 @@
 import time
 import random
-from influxdb_client import InfluxDBClient, Point, WritePrecision
-from influxdb_client.client.write_api import SYNCHRONOUS
+import urllib.request
+import urllib.error
+import json
 
-# config
-INFLUX_URL = "http://localhost:8086"
-TOKEN = "secret-token"
-ORG = "robotics"
-BUCKET = "telemetry"
-
-# settings
 ROBOT_IDS = ["robot_1", "robot_2", "robot_3"]
-INTERVAL_SEC = 1  # Time between data points per robot
+INTERVAL_SEC = 1
 
-# connection
-client = InfluxDBClient(url=INFLUX_URL, token=TOKEN, org=ORG)
-write_api = client.write_api(write_options=SYNCHRONOUS)
-
-# simulates robot telemtry
 def generate_robot_data(robot_id):
     return {
+        "robot_id": robot_id,
         "state": random.choice(["idle", "active", "charging", "dead"]),
         "battery": random.uniform(30, 100),
         "battery_health": random.uniform(20, 80),
     }
 
-# sends robots telemetry to db
 def send_data():
+    print("Sent data for", end=" ")
+    for robot_id in ROBOT_IDS:
+        telemetry = generate_robot_data(robot_id)
+        json_telemetry = json.dumps(telemetry).encode("utf-8")
+        req = urllib.request.Request(
+            url = "http://localhost:5000/robot-metrics",
+            data = json_telemetry,
+            method = "POST",
+            headers = {"Content-Type": "application/json"}
+        )
+        try:
+            response = urllib.request.urlopen(req)
+            print(robot_id, end=" ")
+            response.close()
+        except urllib.error.HTTPError as e:
+            print(f"HTTP Error: {e.code} {e.reason}", end=" ")
+        except urllib.error.URLError as e:
+            print(f"URL Error: {e.reason}", end=" ")
+    print("", flush=True)
+
+def simulator_loop():
     print("Starting simulator... Press Ctrl+C to stop.", flush=True)
     try:
         while True:
-            print("Sent data for", end=" ")
-            for robot_id in ROBOT_IDS:
-                telemetry = generate_robot_data(robot_id)
-                point = (
-                    Point("robot_metrics")
-                    .tag("robot_id", robot_id)
-                    .tag("state", telemetry["state"])
-                    .field("battery", telemetry["battery"])
-                    .field("battery_health", telemetry["battery_health"])
-                    .time(time.time_ns(), WritePrecision.NS)
-                )
-                write_api.write(bucket=BUCKET, org=ORG, record=point)
-                print(robot_id, end=" ")
-            print("", flush=True)
+            send_data()
             time.sleep(INTERVAL_SEC)
     except KeyboardInterrupt:
         print("Simulation stopped.", flush=True)
-    finally:
-        client.close()
 
 if __name__ == "__main__":
-    send_data()
+    simulator_loop()
